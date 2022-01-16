@@ -1,30 +1,32 @@
 from flask import Flask,render_template,flash,redirect,url_for,session,logging,request
-from flask_mysqldb import MySQL
+
+from jikanpy import Jikan
 import random
+
+jikan = Jikan()
 
 
 app=Flask(__name__)
 
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '1234'
-app.config['MYSQL_DB'] = 'suggestanime'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
-mysql = MySQL(app)
+
+
 
 @app.route('/')
 def home():
-	cur = mysql.connection.cursor()
-	cur.execute("select count(wallpaperid) as total from wallpapers")
-	total = cur.fetchone()
-	wallpaperid = random.randint(1,total['total'])
-	cur.execute('select linkid from wallpapers where wallpaperid = (%s)', (wallpaperid,))
-	linkid = cur.fetchone()
-	linkid = linkid['linkid']
-	imageUrl = "https://drive.google.com/uc?export=view&id="+linkid
-	return render_template('index.html', imageUrl = imageUrl)
+	imageUrl = "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+	return render_template('index2.html', imageUrl = imageUrl)
 
+@app.route('/data/', methods = ['POST', 'GET'])
+def data():
+	if request.method == 'GET':
+		return f"The URL /data is accessed directly. Input the name to see results"
+
+	if request.method == 'POST':
+		form_data = request.form
+		searches = jikan.search('anime',form_data['name'])
+		imageUrl = searches['results'][0]['image_url']
+		return render_template('index2.html', imageUrl = imageUrl)
 if __name__ == '__main__':
     app.run(debug=True)
