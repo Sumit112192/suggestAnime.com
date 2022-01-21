@@ -21,12 +21,15 @@ def home():
 @app.route('/data/', methods = ['POST', 'GET'])
 def data():
 	if request.method == 'GET':
-		return f"The URL /data is accessed directly. Input the name to see results"
+		return "The URL /data is accessed directly. Input the name to see results"
 
 	if request.method == 'POST':
 		form_data = request.form
 		searches = jikan.search('anime',form_data['name'])
 		imageUrl = searches['results'][0]['image_url']
-		return render_template('index2.html', imageUrl = imageUrl)
+		if imageUrl is not None:
+			return render_template('index2.html', imageUrl = imageUrl)
+		else:
+			return "No data available"
 if __name__ == '__main__':
     app.run(debug=True)
